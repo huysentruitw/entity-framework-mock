@@ -72,6 +72,7 @@ namespace EntityFrameworkMock.NSubstitute
         public void Reset()
         {
             _dbSetCache.Clear();
+            DbContextObject.ClearReceivedCalls();
             DbContextObject.SaveChanges().Returns(a => SaveChanges());
             DbContextObject.SaveChangesAsync().Returns(a => SaveChanges());
             DbContextObject.SaveChangesAsync(Arg.Any<CancellationToken>()).Returns(a => SaveChanges());
