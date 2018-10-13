@@ -4,6 +4,8 @@
 
 Easy Mock wrapper for mocking EF6 DbContext and DbSet in your unit-tests. Integrates with Moq or NSubstitute.
 
+For mocking Entity Framework Core (EF Core) see https://github.com/huysentruitw/entity-framework-core-mock
+
 ## Get it on NuGet
 
 ### Moq integration
