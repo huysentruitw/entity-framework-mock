@@ -227,6 +227,16 @@ namespace EntityFrameworkMock.NSubstitute.Tests
             }
         }
 
+        [Test]
+        public void DbContextMock_GenericSet_ShouldReturnDbSetMock()
+        {
+            var dbContextMock = new DbContextMock<TestDbContext>("abc");
+            var dbSetMock = dbContextMock.CreateDbSetMock(x => x.Users);
+            var dbSet = dbContextMock.DbContextObject.Set<User>();
+            Assert.That(dbSet, Is.Not.Null);
+            Assert.That(dbSet, Is.EqualTo(dbSetMock.DbSet));
+        }
+
         public class TestDbSetMock : IDbSetMock
         {
             public int SaveChanges() => 55861;
