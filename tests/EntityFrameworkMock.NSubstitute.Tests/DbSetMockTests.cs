@@ -106,6 +106,27 @@ namespace EntityFrameworkMock.NSubstitute.Tests
         }
 
         [Test]
+        public void DbSetMock_GivenRangeOfEntitiesIsRemoved_ShouldRemoveAfterCallingSaveChanges()
+        {
+            var users = new[]
+            {
+                new User {Id = Guid.NewGuid(), FullName = "User 1"},
+                new User {Id = Guid.NewGuid(), FullName = "User 2"},
+                new User {Id = Guid.NewGuid(), FullName = "User 3"}
+            };
+            var dbSetMock = new DbSetMock<User>(users, (x, _) => x.Id);
+            var dbSet = dbSetMock.DbSet;
+
+            Assert.That(dbSet.Count(), Is.EqualTo(3));
+            dbSet.RemoveRange(users.Skip(1));
+            Assert.That(dbSet.Count(), Is.EqualTo(3));
+            ((IDbSetMock)dbSetMock).SaveChanges();
+            Assert.That(dbSet.Count(), Is.EqualTo(1));
+            Assert.That(dbSet.Any(x => x.FullName == "User 1"), Is.True);
+            Assert.That(dbSet.Any(x => x.FullName == "User 2"), Is.False);
+        }
+
+        [Test]
         public void DbSetMock_SaveChanges_GivenEntityPropertyIsChanged_ShouldFireSavedChangesEventWithCorrectUpdatedInfo()
         {
             var userId = Guid.NewGuid();
@@ -159,6 +180,28 @@ namespace EntityFrameworkMock.NSubstitute.Tests
             Assert.That(updatedProperty.Name, Is.EqualTo("Value"));
             Assert.That(updatedProperty.Original, Is.EqualTo(null));
             Assert.That(updatedProperty.New, Is.EqualTo("abc"));
+        }
+
+        [Test]
+        public void DbSetMock_Empty_AsEnumerable_ShouldReturnEmptyEnumerable()
+        {
+            var dbSetMock = new DbSetMock<NestedModel>(new List<NestedModel>(), (x, _) => x.Id);
+            var nestedModels = dbSetMock.DbSet.AsEnumerable();
+            Assert.That(nestedModels, Is.Not.Null);
+            Assert.That(nestedModels, Is.Empty);
+        }
+
+        [Test]
+        public void DbSetMock_AsEnumerable_ShouldReturnEnumerableCollection()
+        {
+            var dbSetMock = new DbSetMock<NestedModel>(new[]
+            {
+                new NestedModel {Id = Guid.NewGuid(), NestedDocument = new NestedModel.Document()},
+                new NestedModel {Id = Guid.NewGuid(), NestedDocument = new NestedModel.Document()}
+            }, (x, _) => x.Id);
+            var nestedModels = dbSetMock.DbSet.AsEnumerable();
+            Assert.That(nestedModels, Is.Not.Null);
+            Assert.That(nestedModels.Count(), Is.EqualTo(2));
         }
 
         public class NestedModel

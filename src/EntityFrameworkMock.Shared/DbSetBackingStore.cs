@@ -45,8 +45,6 @@ namespace EntityFrameworkMock
 
         public IQueryable<TEntity> GetDataAsQueryable() => _entities.Values.AsQueryable();
 
-        public IEnumerator<TEntity> GetDataEnumerator() => _entities.Values.GetEnumerator();
-
         /// <summary>
         /// Registers the addition of a new entity.
         /// </summary>
