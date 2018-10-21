@@ -39,7 +39,6 @@ namespace EntityFrameworkMock
         public DbSetBackingStore(IEnumerable<TEntity> initialEntities, Func<TEntity, KeyContext, object> keyFactory)
         {
             _keyFactory = keyFactory ?? throw new ArgumentNullException(nameof(keyFactory));
-
             initialEntities?.ToList().ForEach(x => _entities.Add(_keyFactory(x, _keyContext), Clone(x)));
         }
 
