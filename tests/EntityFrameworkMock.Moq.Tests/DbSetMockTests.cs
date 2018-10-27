@@ -178,6 +178,21 @@ namespace EntityFrameworkMock.Tests
             Assert.That(nestedModels.Count(), Is.EqualTo(2));
         }
 
+        [Test]
+        public async Task DbSetMock_AsyncProvider_ShouldReturnRequestedModel()
+        {
+            var userId = Guid.NewGuid();
+            var dbSetMock = new DbSetMock<User>(new[]
+            {
+                new User {Id = userId, FullName = "Mark Kramer"},
+                new User {Id = Guid.NewGuid(), FullName = "Freddy Kipcurry"}
+            }, (x, _) => x.Id);
+
+            var model = await dbSetMock.Object.Where(x => x.Id == userId).FirstOrDefaultAsync();
+            Assert.That(model, Is.Not.Null);
+            Assert.That(model.FullName, Is.EqualTo("Mark Kramer"));
+        }
+
         public class NestedModel
         {
             public Guid Id { get; set; }

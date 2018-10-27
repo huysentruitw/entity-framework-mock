@@ -31,7 +31,7 @@ namespace EntityFrameworkMock.NSubstitute
         private readonly IKeyFactoryBuilder _keyFactoryBuilder;
         private readonly Dictionary<MemberInfo, IDbSetMock> _dbSetCache = new Dictionary<MemberInfo, IDbSetMock>();
 
-        public TDbContext DbContextObject { get; set; }
+        public TDbContext Object { get; set; }
 
         public DbContextMock(params object[] args)
             : this(new AttributeBasedKeyFactoryBuilder<KeyAttribute>(), args)
@@ -40,7 +40,7 @@ namespace EntityFrameworkMock.NSubstitute
 
         private DbContextMock(IKeyFactoryBuilder keyFactoryBuilder, params object[] args)
         {
-            DbContextObject = Substitute.ForPartsOf<TDbContext>(args);
+            Object = Substitute.ForPartsOf<TDbContext>(args);
             _keyFactoryBuilder = keyFactoryBuilder ?? throw new ArgumentNullException(nameof(keyFactoryBuilder));
             Reset();
         }
@@ -61,9 +61,9 @@ namespace EntityFrameworkMock.NSubstitute
             var memberInfo = ((MemberExpression)dbSetSelector.Body).Member;
             if (_dbSetCache.ContainsKey(memberInfo)) throw new ArgumentException($"DbSetMock for {memberInfo.Name} already created", nameof(dbSetSelector));
             var mock = new DbSetMock<TEntity>(initialEntities, entityKeyFactory);
-            DbContextObject.Set<TEntity>().Returns(mock.DbSet);
+            Object.Set<TEntity>().Returns(mock.Object);
 
-            dbSetSelector.Compile()(DbContextObject).Returns(mock.DbSet);
+            dbSetSelector.Compile()(Object).Returns(mock.Object);
 
             _dbSetCache.Add(memberInfo, mock);
             return mock;
@@ -72,10 +72,10 @@ namespace EntityFrameworkMock.NSubstitute
         public void Reset()
         {
             _dbSetCache.Clear();
-            DbContextObject.ClearReceivedCalls();
-            DbContextObject.SaveChanges().Returns(a => SaveChanges());
-            DbContextObject.SaveChangesAsync().Returns(a => SaveChanges());
-            DbContextObject.SaveChangesAsync(Arg.Any<CancellationToken>()).Returns(a => SaveChanges());
+            Object.ClearReceivedCalls();
+            Object.SaveChanges().Returns(a => SaveChanges());
+            Object.SaveChangesAsync().Returns(a => SaveChanges());
+            Object.SaveChangesAsync(Arg.Any<CancellationToken>()).Returns(a => SaveChanges());
         }
 
         // Facilitates unit-testing
