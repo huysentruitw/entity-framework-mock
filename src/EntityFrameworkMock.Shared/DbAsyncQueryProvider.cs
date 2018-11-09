@@ -3,6 +3,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System;
 
 namespace EntityFrameworkMock
 {
@@ -16,7 +17,21 @@ namespace EntityFrameworkMock
             _inner = inner;
         }
 
-        public IQueryable CreateQuery(Expression expression) => new DbAsyncEnumerable<TEntity>(expression);
+        public IQueryable CreateQuery(Expression expression)
+        {
+            switch (expression)
+            {
+                case MethodCallExpression m:
+                {
+                    var resultType = m.Method.ReturnType;
+                    var genericElement = resultType.GetGenericArguments()[0];
+                    var queryType = typeof(DbAsyncEnumerable<>).MakeGenericType(genericElement);
+                    return (IQueryable)Activator.CreateInstance(queryType, expression);
+                }
+            }
+
+            return new DbAsyncEnumerable<TEntity>(expression);
+        }
 
         public IQueryable<TElement> CreateQuery<TElement>(Expression expression) => new DbAsyncEnumerable<TElement>(expression);
 
