@@ -19,18 +19,13 @@ namespace EntityFrameworkMock
 
         public IQueryable CreateQuery(Expression expression)
         {
-            switch (expression)
-            {
-                case MethodCallExpression m:
-                {
-                    var resultType = m.Method.ReturnType;
-                    var genericElement = resultType.GetGenericArguments()[0];
-                    var queryType = typeof(DbAsyncEnumerable<>).MakeGenericType(genericElement);
-                    return (IQueryable)Activator.CreateInstance(queryType, expression);
-                }
-            }
+            if (!(expression is MethodCallExpression mExpression))
+                return new DbAsyncEnumerable<TEntity>(expression);
 
-            return new DbAsyncEnumerable<TEntity>(expression);
+            var resultType = mExpression.Method.ReturnType;
+            var genericElement = resultType.GetGenericArguments()[0];
+            var queryType = typeof(DbAsyncEnumerable<>).MakeGenericType(genericElement);
+            return (IQueryable)Activator.CreateInstance(queryType, expression);
         }
 
         public IQueryable<TElement> CreateQuery<TElement>(Expression expression) => new DbAsyncEnumerable<TElement>(expression);
