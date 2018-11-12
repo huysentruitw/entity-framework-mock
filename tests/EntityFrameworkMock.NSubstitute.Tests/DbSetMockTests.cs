@@ -4,6 +4,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using EntityFrameworkMock.Tests.Models;
 using NUnit.Framework;
 
@@ -217,6 +219,23 @@ namespace EntityFrameworkMock.NSubstitute.Tests
             var model = await dbSetMock.Object.Where(x => x.Id == userId).FirstOrDefaultAsync();
             Assert.That(model, Is.Not.Null);
             Assert.That(model.FullName, Is.EqualTo("Mark Kramer"));
+        }
+
+        [Test]
+        public void DbSetMock_FetchDataWithAutoMapperProjectTo_ShouldNotThrowException()
+        {
+            var dbSetMock = new DbSetMock<User>(new[]
+            {
+                new User {Id = Guid.NewGuid(), FullName = "Rita Gesmorov"},
+                new User {Id = Guid.NewGuid(), FullName = "Kelly Verbier"}
+            }, (x, _) => x.Id);
+
+            var mapperConfig = new MapperConfiguration(mapper => mapper.CreateMap<User, NestedModel>());
+
+            Assert.DoesNotThrowAsync(async () => await dbSetMock.Object
+                .Where(x => x.FullName.Contains("Rita"))
+                .ProjectTo<NestedModel>(mapperConfig)
+                .ToListAsync());
         }
 
         public class NestedModel

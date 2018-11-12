@@ -1,4 +1,5 @@
-﻿using System.Data.Entity.Infrastructure;
+﻿using System;
+using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
@@ -16,7 +17,18 @@ namespace EntityFrameworkMock
             _inner = inner;
         }
 
-        public IQueryable CreateQuery(Expression expression) => new DbAsyncEnumerable<TEntity>(expression);
+        public IQueryable CreateQuery(Expression expression)
+        {
+            if (expression is MethodCallExpression methodCallExpression)
+            {
+                var resultType = methodCallExpression.Method.ReturnType;
+                var genericElement = resultType.GetGenericArguments()[0];
+                var queryType = typeof(DbAsyncEnumerable<>).MakeGenericType(genericElement);
+                return (IQueryable)Activator.CreateInstance(queryType, expression);
+            }
+
+            return new DbAsyncEnumerable<TEntity>(expression);
+        }
 
         public IQueryable<TElement> CreateQuery<TElement>(Expression expression) => new DbAsyncEnumerable<TElement>(expression);
 
