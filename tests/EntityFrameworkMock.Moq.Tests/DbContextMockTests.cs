@@ -6,6 +6,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using EntityFrameworkMock.Tests.Models;
 using NUnit.Framework;
+using System.Collections.Generic;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 
 namespace EntityFrameworkMock.Tests
 {
@@ -173,6 +176,53 @@ namespace EntityFrameworkMock.Tests
             var dbSet = dbContextMock.Object.Set<User>();
             Assert.That(dbSet, Is.Not.Null);
             Assert.That(dbSet, Is.EqualTo(dbSetMock.Object));
+        }
+
+        [Test]
+        public void DbContextMock_FetchDataWithAutoMapperProjectTo_ShouldNotThrowException()
+        {
+            var config = new MapperConfiguration(
+                mapper => { mapper.CreateMap<User, UserViewModel>(); });
+
+            var dbContextMock = new DbContextMock<TestDbContext>("abc");
+            dbContextMock.CreateDbSetMock(x => x.Users, new List<User> {
+                new User {
+                    FullName = "Test",
+                    Id = Guid.NewGuid()
+                }
+            });
+
+            var userProvider = new UserProviderTestClass(dbContextMock.Object, config);
+
+            Assert.DoesNotThrowAsync(async () => await userProvider.GetUsersAsync(CancellationToken.None).ConfigureAwait(false));
+        }
+
+        public class UserProviderTestClass
+        {
+            private readonly TestDbContext _context;
+            private readonly IConfigurationProvider _mapperConfig;
+
+            public UserProviderTestClass(TestDbContext context, IConfigurationProvider mapperConfig)
+            {
+                _context = context;
+                _mapperConfig = mapperConfig;
+            }
+
+            public async Task<IList<UserViewModel>> GetUsersAsync(CancellationToken token)
+            {
+                return await _context.Users
+                    .Where(u => u.FullName.Contains("Test"))
+                    .ProjectTo<UserViewModel>(_mapperConfig)
+                    .ToListAsync(token)
+                    .ConfigureAwait(false);
+            }
+        }
+
+        public class UserViewModel
+        {
+            public Guid Id { get; set; }
+
+            public string FullName { get; set; }
         }
 
         public class TestDbSetMock : IDbSetMock
