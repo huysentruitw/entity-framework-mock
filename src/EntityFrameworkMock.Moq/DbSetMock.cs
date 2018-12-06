@@ -20,6 +20,8 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Moq;
 
 namespace EntityFrameworkMock
@@ -52,6 +54,9 @@ namespace EntityFrameworkMock
             Setup(x => x.AddRange(It.IsAny<IEnumerable<TEntity>>())).Callback<IEnumerable<TEntity>>(_store.Add);
             Setup(x => x.Remove(It.IsAny<TEntity>())).Callback<TEntity>(_store.Remove);
             Setup(x => x.RemoveRange(It.IsAny<IEnumerable<TEntity>>())).Callback<IEnumerable<TEntity>>(_store.Remove);
+
+            Setup(x => x.Find(It.IsAny<object[]>())).Returns<object[]>(_store.Find);
+            Setup(x => x.FindAsync(It.IsAny<CancellationToken>(), It.IsAny<object[]>())).Returns<CancellationToken, object[]>((_, x) => Task.FromResult(_store.Find(x)));
 
             _store.UpdateSnapshot();
         }

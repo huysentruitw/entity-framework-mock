@@ -195,6 +195,21 @@ namespace EntityFrameworkMock.Tests
         }
 
         [Test]
+        public void DbSetMock_Find_ShouldReturnRequestedModel()
+        {
+            Guid user1 = Guid.NewGuid(), user2 = Guid.NewGuid();
+            var dbSetMock = new DbSetMock<User>(new[]
+            {
+                new User {Id = user1, FullName = "Mark Kramer"},
+                new User {Id = user2, FullName = "Freddy Kipcurry"}
+            }, (x, _) => new Tuple<Guid>(x.Id));
+
+            var result = dbSetMock.Object.Find(user2);
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.FullName, Is.EqualTo("Freddy Kipcurry"));
+        }
+
+        [Test]
         public void DbSetMock_FetchDataWithAutoMapperProjectTo_ShouldNotThrowException()
         {
             var dbSetMock = new DbSetMock<User>(new[]
