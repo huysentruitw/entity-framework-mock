@@ -72,7 +72,7 @@ namespace EntityFrameworkMock
             if (constructor == null) throw new InvalidOperationException("No tuple constructor found for key values");
 
             var key = constructor.Invoke(keyValues);
-            return _entities[key];
+            return _entities.TryGetValue(key, out var entity) ? entity : null;
         }
 
         /// <summary>

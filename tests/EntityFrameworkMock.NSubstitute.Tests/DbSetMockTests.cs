@@ -237,6 +237,20 @@ namespace EntityFrameworkMock.NSubstitute.Tests
         }
 
         [Test]
+        public void DbSetMock_Find_UnknownId_ShouldReturnNull()
+        {
+            var unknownUser = Guid.NewGuid();
+            var dbSetMock = new DbSetMock<User>(new[]
+            {
+                new User {Id = Guid.NewGuid(), FullName = "Mark Kramer"},
+                new User {Id = Guid.NewGuid(), FullName = "Freddy Kipcurry"}
+            }, (x, _) => new Tuple<Guid>(x.Id));
+
+            var result = dbSetMock.Object.Find(unknownUser);
+            Assert.That(result, Is.Null);
+        }
+
+        [Test]
         public void DbSetMock_FetchDataWithAutoMapperProjectTo_ShouldNotThrowException()
         {
             var dbSetMock = new DbSetMock<User>(new[]
