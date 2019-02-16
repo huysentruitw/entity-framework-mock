@@ -30,7 +30,7 @@ namespace EntityFrameworkMock
     public sealed class DbSetBackingStore<TEntity>
         where TEntity : class
     {
-        private readonly Func<TEntity, KeyContext, object> _keyFactory;
+        private readonly KeyFactoryWrapper<TEntity> _keyFactoryWrapper;
         private readonly Dictionary<object, TEntity> _entities = new Dictionary<object, TEntity>();
         private readonly Dictionary<object, TEntity> _snapshot = new Dictionary<object, TEntity>();
         private List<DbSetChange> _changes = new List<DbSetChange>();
@@ -38,8 +38,8 @@ namespace EntityFrameworkMock
 
         public DbSetBackingStore(IEnumerable<TEntity> initialEntities, Func<TEntity, KeyContext, object> keyFactory)
         {
-            _keyFactory = keyFactory ?? throw new ArgumentNullException(nameof(keyFactory));
-            initialEntities?.ToList().ForEach(x => _entities.Add(_keyFactory(x, _keyContext), Clone(x)));
+            _keyFactoryWrapper = new KeyFactoryWrapper<TEntity>(keyFactory ?? throw new ArgumentNullException(nameof(keyFactory)), _keyContext);
+            initialEntities?.ToList().ForEach(x => _entities.Add(_keyFactoryWrapper.GenerateKey(x), Clone(x)));
         }
 
         public IQueryable<TEntity> GetDataAsQueryable() => _entities.Values.AsQueryable();
@@ -137,14 +137,14 @@ namespace EntityFrameworkMock
 
         private void AddEntity(TEntity entity)
         {
-            var key = _keyFactory(entity, _keyContext);
+            var key = _keyFactoryWrapper.GenerateKey(entity);
             if (_entities.ContainsKey(key)) ThrowDbUpdateException();
             _entities.Add(key, entity);
         }
 
         private void RemoveEntity(TEntity entity)
         {
-            var key = _keyFactory(entity, _keyContext);
+            var key = _keyFactoryWrapper.GenerateKey(entity);
             if (!_entities.Remove(key)) ThrowDbUpdateConcurrencyException();
         }
 
