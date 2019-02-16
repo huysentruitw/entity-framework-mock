@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net452</TargetFramework>
+    <TargetFramework>net472</TargetFramework>
     <Title>EntityFrameworkMock.Shared</Title>
     <Product>EntityFrameworkMock</Product>
     <Version>1.0.0.0</Version>
