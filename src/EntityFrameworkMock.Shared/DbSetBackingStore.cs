@@ -30,7 +30,7 @@ namespace EntityFrameworkMock
     public sealed class DbSetBackingStore<TEntity>
         where TEntity : class
     {
-        private readonly KeyFactoryWrapper<TEntity> _keyFactoryWrapper;
+        private readonly KeyFactoryNormalizer<TEntity> _keyFactoryNormalizer;
         private readonly Dictionary<object, TEntity> _entities = new Dictionary<object, TEntity>();
         private readonly Dictionary<object, TEntity> _snapshot = new Dictionary<object, TEntity>();
         private List<DbSetChange> _changes = new List<DbSetChange>();
@@ -38,8 +38,8 @@ namespace EntityFrameworkMock
 
         public DbSetBackingStore(IEnumerable<TEntity> initialEntities, Func<TEntity, KeyContext, object> keyFactory)
         {
-            _keyFactoryWrapper = new KeyFactoryWrapper<TEntity>(keyFactory ?? throw new ArgumentNullException(nameof(keyFactory)), _keyContext);
-            initialEntities?.ToList().ForEach(x => _entities.Add(_keyFactoryWrapper.GenerateKey(x), Clone(x)));
+            _keyFactoryNormalizer = new KeyFactoryNormalizer<TEntity>(keyFactory ?? throw new ArgumentNullException(nameof(keyFactory)));
+            initialEntities?.ToList().ForEach(x => _entities.Add(_keyFactoryNormalizer.GenerateKey(x, _keyContext), Clone(x)));
         }
 
         public IQueryable<TEntity> GetDataAsQueryable() => _entities.Values.AsQueryable();
@@ -137,14 +137,14 @@ namespace EntityFrameworkMock
 
         private void AddEntity(TEntity entity)
         {
-            var key = _keyFactoryWrapper.GenerateKey(entity);
+            var key = _keyFactoryNormalizer.GenerateKey(entity, _keyContext);
             if (_entities.ContainsKey(key)) ThrowDbUpdateException();
             _entities.Add(key, entity);
         }
 
         private void RemoveEntity(TEntity entity)
         {
-            var key = _keyFactoryWrapper.GenerateKey(entity);
+            var key = _keyFactoryNormalizer.GenerateKey(entity, _keyContext);
             if (!_entities.Remove(key)) ThrowDbUpdateConcurrencyException();
         }
 

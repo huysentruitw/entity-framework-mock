@@ -20,20 +20,18 @@ using System.Reflection;
 
 namespace EntityFrameworkMock
 {
-    internal sealed class KeyFactoryWrapper<TEntity>
+    internal sealed class KeyFactoryNormalizer<TEntity>
         where TEntity : class
     {
         private readonly Func<TEntity, KeyContext, object> _keyFactory;
-        private readonly KeyContext _keyContext;
 
-        public KeyFactoryWrapper(Func<TEntity, KeyContext, object> keyFactory, KeyContext keyContext)
+        public KeyFactoryNormalizer(Func<TEntity, KeyContext, object> keyFactory)
         {
             _keyFactory = keyFactory;
-            _keyContext = keyContext;
         }
 
-        public object GenerateKey(TEntity entity)
-            => NormalizeKey(_keyFactory(entity, _keyContext));
+        public object GenerateKey(TEntity entity, KeyContext keyContext)
+            => NormalizeKey(_keyFactory(entity, keyContext));
 
         private static object NormalizeKey(object key)
         {
