@@ -96,7 +96,6 @@ namespace EntityFrameworkMock.NSubstitute.Tests
         public void DbContextMock_CreateDbSetMock_ShouldSetupMockForDbSetSelector()
         {
             var dbContextMock = new DbContextMock<TestDbContext>("abc");
-            Assert.That(dbContextMock.Object.Users, Is.Null);
             dbContextMock.CreateDbSetMock<User>(x => x.Users);
             Assert.That(dbContextMock.Object.Users, Is.Not.Null);
         }
