@@ -40,7 +40,7 @@ namespace EntityFrameworkMock.NSubstitute
 
         private DbContextMock(IKeyFactoryBuilder keyFactoryBuilder, params object[] args)
         {
-            Object = Substitute.ForPartsOf<TDbContext>(args);
+            Object = Substitute.For<TDbContext>(args);
             _keyFactoryBuilder = keyFactoryBuilder ?? throw new ArgumentNullException(nameof(keyFactoryBuilder));
             Reset();
         }
