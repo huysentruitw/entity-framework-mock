@@ -50,12 +50,15 @@ namespace EntityFrameworkMock
             var entityArgument = Expression.Parameter(typeof(T));
             var keyContextArgument = Expression.Parameter(typeof(KeyContext));
 
-            if (keyProperty.PropertyType == typeof(long))
+            if (keyProperty.PropertyType == typeof(int))
+            {
+                return BuildIdentityKeyFactory<T, int>(keyProperty, ctx => Expression.Property(ctx, nameof(KeyContext.NextIdentity)));
+            }
+            else if (keyProperty.PropertyType == typeof(long))
             {
                 return BuildIdentityKeyFactory<T, long>(keyProperty, ctx => Expression.Property(ctx, nameof(KeyContext.NextIdentity)));
             }
-
-            if (keyProperty.PropertyType == typeof(Guid))
+            else if (keyProperty.PropertyType == typeof(Guid))
             {
                 return BuildIdentityKeyFactory<T, Guid>(keyProperty, _ => Expression.Call(typeof(Guid), nameof(Guid.NewGuid), new Type[0]));
             }
@@ -75,7 +78,7 @@ namespace EntityFrameworkMock
                 Expression.Assign(keyValueVariable, Expression.Convert(Expression.Property(entityArgument, keyProperty), typeof(TKey))),
                 Expression.IfThen(Expression.Equal(keyValueVariable, Expression.Default(typeof(TKey))),
                 Expression.Block(
-                        Expression.Assign(keyValueVariable, nextIdentity(keyContextArgument)),
+                        Expression.Assign(keyValueVariable, Expression.Convert(nextIdentity(keyContextArgument), typeof(TKey))),
                         Expression.Assign(Expression.Property(entityArgument, keyProperty), keyValueVariable)
                     )
                 ),
