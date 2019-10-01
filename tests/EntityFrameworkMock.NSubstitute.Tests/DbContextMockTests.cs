@@ -5,6 +5,7 @@ using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using EntityFrameworkMock.NSubstitute.Tests.Models;
 using EntityFrameworkMock.Tests.Models;
 using NUnit.Framework;
 
@@ -245,6 +246,25 @@ namespace EntityFrameworkMock.NSubstitute.Tests
         }
 
         [Test]
+        public void DbContextMock_CreateDbSetMock_AddMultipleModelsWithLongAsDatabaseGeneratedIdentityKey_ShouldGenerateIncrementalKey()
+        {
+            // Arrange
+            var dbContextMock = new DbContextMock<TestDbContext>("abc");
+            var dbSetMock = dbContextMock.CreateDbSetMock(x => x.IntKeyModels);
+
+            // Act
+            dbContextMock.Object.IntKeyModels.Add(new IntKeyModel { Url = "A" });
+            dbContextMock.Object.IntKeyModels.Add(new IntKeyModel { Url = "B" });
+            dbContextMock.Object.IntKeyModels.Add(new IntKeyModel { Url = "C" });
+            dbContextMock.Object.SaveChanges();
+
+            // Assert
+            Assert.That(dbSetMock.Object.First(x => x.Url == "A").LoggingRepositoryId, Is.EqualTo(1));
+            Assert.That(dbSetMock.Object.First(x => x.Url == "B").LoggingRepositoryId, Is.EqualTo(2));
+            Assert.That(dbSetMock.Object.First(x => x.Url == "C").LoggingRepositoryId, Is.EqualTo(3));
+        }
+
+        [Test]
         public void DbContextMock_GenericSet_ShouldReturnDbSetMock()
         {
             var dbContextMock = new DbContextMock<TestDbContext>("abc");
@@ -276,6 +296,8 @@ namespace EntityFrameworkMock.NSubstitute.Tests
             public virtual DbSet<GeneratedKeyModel> GeneratedKeyModels { get; set; }
 
             public virtual DbSet<GeneratedGuidKeyModel> GeneratedGuidKeyModels { get; set; }
+
+            public virtual DbSet<IntKeyModel> IntKeyModels { get; set; }
         }
     }
 }
