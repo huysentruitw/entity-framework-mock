@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net472</TargetFramework>
+    <TargetFrameworks>net45;netstandard2.1</TargetFrameworks>
     <Title>EntityFrameworkMock.Shared</Title>
     <Product>EntityFrameworkMock</Product>
     <Version>1.0.0.0</Version>
@@ -12,10 +12,21 @@
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Description>Shared code for EntityFrameworkMock.Moq</Description>
     <Copyright>Copyright 2017-2019 Wouter Huysentruit</Copyright>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="EntityFramework" Version="6.2.0" />
+    <PackageReference Include="System.ValueTuple" Version="[4.3.0, 5.0.0)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net45'">
+    <PackageReference Include="EntityFramework" Version="[6.1.1, 7.0.0)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
+    <PackageReference Include="EntityFramework" Version="[6.3.0, 7.0.0)" />
+    <PackageReference Include="System.ComponentModel.Annotations" Version="[4.6.0, 5.0.0)" />
+    <PackageReference Include="System.Data.SqlClient" Version="[4.7.0, 5.0.0)" />
   </ItemGroup>
 
 </Project>

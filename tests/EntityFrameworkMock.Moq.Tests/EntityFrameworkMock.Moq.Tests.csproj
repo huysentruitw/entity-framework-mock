@@ -5,16 +5,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Castle.Core" Version="[4.3.1, 5.0.0)" />
+    <PackageReference Include="Moq" Version="[4.10.0, 5.0.0)" />
     <PackageReference Include="AutoMapper" Version="8.1.0" />
-    <PackageReference Include="Castle.Core" Version="4.4.0" />
-    <PackageReference Include="EntityFramework" Version="6.2.0" />
-    <PackageReference Include="Moq" Version="4.10.1" />
     <PackageReference Include="NUnit" Version="3.12.0" />
-    <PackageReference Include="NUnit3TestAdapter" Version="3.13.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.15.1" />
+    <PackageReference Include="EntityFramework" Version="[6.1.1, 7.0.0)" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\EntityFrameworkMock.Moq\EntityFrameworkMock.Moq.csproj" />
   </ItemGroup>
-  
 </Project>
