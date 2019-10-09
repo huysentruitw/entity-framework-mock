@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Reflection;
 using System.Runtime.Serialization;
@@ -29,13 +30,8 @@ namespace EntityFrameworkMock
             SqlException exception = Instantiate<SqlException>();
             SetProperty(exception, "_message", message);
 
-            var errors = new ArrayList();
-            var errorCollection = Instantiate<SqlErrorCollection>();
-            SetProperty(errorCollection, "errors", errors);
-
-            var error = Instantiate<SqlError>();
-            SetProperty(error, "number", errorCode);
-            errors.Add(error);
+            var errors = new List<object> { GetSqlError(errorCode) };
+            var errorCollection = GetSqlErrorCollection(errors);
 
             SetProperty(exception, "_errors", errorCollection);
             return exception;
@@ -49,14 +45,40 @@ namespace EntityFrameworkMock
         private static void SetProperty<T>(T targetObject, string fieldName, object value)
         {
             var field = typeof(T).GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance);
-            if (field != null)
-            {
-                field.SetValue(targetObject, value);
-            }
-            else
+            if (field == null)
             {
                 throw new InvalidOperationException("No field with name " + fieldName);
             }
+
+            field.SetValue(targetObject, value);
+        }
+
+        private static SqlErrorCollection GetSqlErrorCollection(List<object> errors)
+        {
+            var errorCollection = Instantiate<SqlErrorCollection>();
+#if NET45
+            var errorsArrayList = new ArrayList(errors);
+            SetProperty(errorCollection, "errors", errorsArrayList);
+#endif
+
+#if NETSTANDARD2_1
+            SetProperty(errorCollection, "_errors", errors);
+#endif
+
+            return errorCollection;
+        }
+
+        private static SqlError GetSqlError(int errorCode)
+        {
+            var error = Instantiate<SqlError>();
+#if NET45
+            SetProperty(error, "number", errorCode);
+#endif
+
+#if NETSTANDARD2_1
+            SetProperty(error, "_number", errorCode);
+#endif
+            return error;
         }
     }
 }
