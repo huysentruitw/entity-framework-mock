@@ -30,8 +30,8 @@ namespace EntityFrameworkMock
             SqlException exception = Instantiate<SqlException>();
             SetProperty(exception, "_message", message);
 
-            var errors = new List<object> { GetSqlError(errorCode) };
-            var errorCollection = GetSqlErrorCollection(errors);
+            var error = GetSqlError(errorCode);
+            var errorCollection = GetSqlErrorCollection(error);
 
             SetProperty(exception, "_errors", errorCollection);
             return exception;
@@ -53,32 +53,55 @@ namespace EntityFrameworkMock
             field.SetValue(targetObject, value);
         }
 
-        private static SqlErrorCollection GetSqlErrorCollection(List<object> errors)
+        private static SqlErrorCollection GetSqlErrorCollection(params object[] errors)
         {
-            var errorCollection = Instantiate<SqlErrorCollection>();
-#if NET45
-            var errorsArrayList = new ArrayList(errors);
-            SetProperty(errorCollection, "errors", errorsArrayList);
-#endif
+            var field = GetField<SqlErrorCollection>("errors")
+                ?? GetField<SqlErrorCollection>("_errors")
+                ?? throw new InvalidOperationException("No errors field found");
 
-#if NETSTANDARD2_1
-            SetProperty(errorCollection, "_errors", errors);
-#endif
+            var errorCollection = Instantiate<SqlErrorCollection>();
+            if (field == null)
+            {
+                return errorCollection;
+            }
+
+            var errorsList = GetErrorsList(field.FieldType, errors);
+
+            field.SetValue(errorCollection, errorsList);
 
             return errorCollection;
         }
 
         private static SqlError GetSqlError(int errorCode)
         {
-            var error = Instantiate<SqlError>();
-#if NET45
-            SetProperty(error, "number", errorCode);
-#endif
+            var field = GetField<SqlError>("number")
+                ?? GetField<SqlError>("_number")
+                ?? throw new InvalidOperationException("No number field found");
 
-#if NETSTANDARD2_1
-            SetProperty(error, "_number", errorCode);
-#endif
+            var error = Instantiate<SqlError>();
+            field.SetValue(error, errorCode);
+
             return error;
+        }
+
+        private static FieldInfo GetField<T>(string fieldName)
+        {
+            return typeof(T).GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance);
+        }
+
+        private static object GetErrorsList(Type type, object[] errors)
+        {
+            if (type == typeof(ArrayList))
+            {
+                return new ArrayList(errors);
+            }
+
+            if (type == typeof(List<object>))
+            {
+                return new List<object>(errors);
+            }
+
+            throw new InvalidOperationException("Error collections of type {type} are not supported");
         }
     }
 }
