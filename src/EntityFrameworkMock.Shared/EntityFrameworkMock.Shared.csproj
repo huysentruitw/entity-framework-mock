@@ -12,7 +12,6 @@
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Description>Shared code for EntityFrameworkMock.Moq</Description>
     <Copyright>Copyright 2017-2019 Wouter Huysentruit</Copyright>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>

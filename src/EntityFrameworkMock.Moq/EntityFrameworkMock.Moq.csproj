@@ -12,7 +12,6 @@
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Description>Easy Mock wrapper for mocking EF6 DbContext and DbSet using Moq</Description>
     <Copyright>Copyright 2017-2019 Wouter Huysentruit</Copyright>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>

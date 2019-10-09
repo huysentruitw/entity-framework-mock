@@ -12,7 +12,6 @@
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <Description>Easy Mock wrapper for mocking EF6 DbContext and DbSet using NSubstitute</Description>
     <Copyright>Copyright 2017-2019 Wouter Huysentruit, Paul Michaels</Copyright>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
