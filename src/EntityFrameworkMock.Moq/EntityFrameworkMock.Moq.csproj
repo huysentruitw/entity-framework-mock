@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net45;netstandard2.1</TargetFrameworks>
+    <TargetFrameworks>net472;netstandard2.1</TargetFrameworks>
     <Title>EntityFrameworkMock.Moq</Title>
     <Product>EntityFrameworkMock</Product>
     <Version>1.0.0.0</Version>
@@ -19,7 +19,7 @@
     <PackageReference Include="Moq" Version="[4.10.0, 5.0.0)" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net45'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'net472'">
     <PackageReference Include="EntityFramework" Version="[6.1.1, 7.0.0)" />
   </ItemGroup>
 
