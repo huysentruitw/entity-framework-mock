@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Reflection;
 using System.Runtime.Serialization;
@@ -29,13 +30,8 @@ namespace EntityFrameworkMock
             SqlException exception = Instantiate<SqlException>();
             SetProperty(exception, "_message", message);
 
-            var errors = new ArrayList();
-            var errorCollection = Instantiate<SqlErrorCollection>();
-            SetProperty(errorCollection, "errors", errors);
-
-            var error = Instantiate<SqlError>();
-            SetProperty(error, "number", errorCode);
-            errors.Add(error);
+            var error = GetSqlError(errorCode);
+            var errorCollection = GetSqlErrorCollection(error);
 
             SetProperty(exception, "_errors", errorCollection);
             return exception;
@@ -49,14 +45,63 @@ namespace EntityFrameworkMock
         private static void SetProperty<T>(T targetObject, string fieldName, object value)
         {
             var field = typeof(T).GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance);
-            if (field != null)
-            {
-                field.SetValue(targetObject, value);
-            }
-            else
+            if (field == null)
             {
                 throw new InvalidOperationException("No field with name " + fieldName);
             }
+
+            field.SetValue(targetObject, value);
+        }
+
+        private static SqlErrorCollection GetSqlErrorCollection(params object[] errors)
+        {
+            var field = GetField<SqlErrorCollection>("errors")
+                ?? GetField<SqlErrorCollection>("_errors")
+                ?? throw new InvalidOperationException("No errors field found");
+
+            var errorCollection = Instantiate<SqlErrorCollection>();
+            if (field == null)
+            {
+                return errorCollection;
+            }
+
+            var errorsList = GetErrorsList(field.FieldType, errors);
+
+            field.SetValue(errorCollection, errorsList);
+
+            return errorCollection;
+        }
+
+        private static SqlError GetSqlError(int errorCode)
+        {
+            var field = GetField<SqlError>("number")
+                ?? GetField<SqlError>("_number")
+                ?? throw new InvalidOperationException("No number field found");
+
+            var error = Instantiate<SqlError>();
+            field.SetValue(error, errorCode);
+
+            return error;
+        }
+
+        private static FieldInfo GetField<T>(string fieldName)
+        {
+            return typeof(T).GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance);
+        }
+
+        private static object GetErrorsList(Type type, object[] errors)
+        {
+            if (type == typeof(ArrayList))
+            {
+                return new ArrayList(errors);
+            }
+
+            if (type == typeof(List<object>))
+            {
+                return new List<object>(errors);
+            }
+
+            throw new InvalidOperationException("Error collections of type {type} are not supported");
         }
     }
 }
