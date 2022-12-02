@@ -14,18 +14,15 @@
     <Copyright>Copyright 2017-2019 Wouter Huysentruit</Copyright>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="System.ValueTuple" Version="[4.3.0, 5.0.0)" />
-  </ItemGroup>
-
   <ItemGroup Condition="'$(TargetFramework)' == 'net472'">
-    <PackageReference Include="EntityFramework" Version="[6.1.1, 7.0.0)" />
+    <PackageReference Include="EntityFramework" Version="6.4.4" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
     <PackageReference Include="EntityFramework" Version="[6.3.0, 7.0.0)" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="[4.6.0, 5.0.0)" />
     <PackageReference Include="System.Data.SqlClient" Version="[4.7.0, 5.0.0)" />
+    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
 
 </Project>
