@@ -237,11 +237,11 @@ namespace EntityFrameworkMock.NSubstitute.Tests
                 }
             }
 
-            // Assert            
-            Assert.AreEqual(300, results.Count());
+            // Assert
+            Assert.That(300, Is.EqualTo(results.Count));
             foreach (var result in results)
             {
-                Assert.IsNotEmpty(result);
+                Assert.That(result, Is.Not.Empty);
             }
         }
 
